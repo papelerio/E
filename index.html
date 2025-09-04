@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego Rítmico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .score-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 100px;
+        }
+        
+        .score-title {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        #gameCanvas {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hit-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            background: #ff8e8e;
+            transform: translateY(-2px);
+        }
+        
+        #startBtn {
+            background: #4CAF50;
+        }
+        
+        #startBtn:hover {
+            background: #66BB6A;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .key-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .key {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+            user-select: none;
+        }
+        
+        .key.pressed {
+            transform: scale(0.95);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+        }
+        
+        .accuracy-display {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .combo {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .score-box {
+                padding: 8px 15px;
+                min-width: 80px;
+            }
+            
+            .score-value {
+                font-size: 1.5rem;
+            }
+            
+            button {
+                padding: 15px 20px;
+                font-size: 14px;
+            }
+            
+            .key {
+                width: 70px;
+                height: 70px;
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ritmo Perfecto</h1>
+        
+        <div class="score-container">
+            <div class="score-box">
+                <div class="score-title">PUNTUACIÓN</div>
+                <div id="score" class="score-value">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-title">PRECISIÓN</div>
+                <div id="accuracy" class="score-value">100%</div>
+            </div>
+            <div class="score-box">
+                <div class="score-title">COMBO</div>
+                <div id="combo" class="score-value">0</div>
+            </div>
+        </div>
+        
+        <div class="hit-line" style="top: 50%;"></div>
+        <canvas id="gameCanvas" width="700" height="400"></canvas>
+        
+        <div class="instructions">
+            <p>Presiona la tecla <strong>X</strong> cuando los círculos lleguen a la línea central</p>
+            <p>Sincroniza tu ritmo con la música</p>
+        </div>
+        
+        <div class="key-container">
+            <div class="key" id="key">X</div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn">Comenzar Juego</button>
+            <button id="resetBtn">Reiniciar</button>
+        </div>
+        
+        <div id="comboText" class="combo"></div>
+    </div>
+
+    <script>
+        // Datos proporcionados (tiempos en milisegundos)
+        const rhythmData = [1024, 1762, 2923, 3610, 4493, 4901, 5607, 6720, 7389, 8040, 8489, 9217, 9415, 9798, 10182, 10413, 11104, 12074, 12719, 13868, 14574, 15712, 16487, 16666, 16865, 17099, 17476, 17891, 18436, 18840, 19348, 19772, 20268, 20720, 21155, 21622, 22037, 22534, 22988, 23457, 23902, 24359, 24818, 25028, 25230, 25442, 25940, 26207, 26718, 26903, 27083, 27717, 28053, 28496, 28677, 28909, 29109, 29594, 29907, 30989, 31438, 32019, 32312, 33193, 33434, 33665, 33816, 34064, 34364, 34971, 35465, 35761, 36652, 36868, 37087, 37333, 37611, 37798, 37964, 38223, 38603, 39346, 39536, 39810, 40126, 40999, 41167, 41528, 41790, 42120, 42433, 42733, 43016, 44659, 44833, 44964, 45404, 46459, 46618, 46990, 47288, 48374, 48558, 48875, 49154, 49450, 49797, 50112, 50330, 50725, 51200, 51355, 51436, 51651, 51810, 51914, 52095, 52241, 52344, 52573, 52720, 52923, 53059, 53840, 54102, 54437, 54772, 55017];
+        
+        // Variables del juego
+        let score = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let accuracy = 100;
+        let totalHits = 0;
+        let successfulHits = 0;
+        let startTime = 0;
+        let isRunning = false;
+        let animationId = null;
+        let rhythmPoints = [];
+        let currentBeatIndex = 0;
+        
+        // Elementos del DOM
+        const scoreElement = document.getElementById('score');
+        const accuracyElement = document.getElementById('accuracy');
+        const comboElement = document.getElementById('combo');
+        const comboTextElement = document.getElementById('comboText');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const keyElement = document.getElementById('key');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Inicializar el juego
+        function init() {
+            startBtn.addEventListener('click', startGame);
+            resetBtn.addEventListener('click', resetGame);
+            
+            // Escuchar la tecla X
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'x' || e.key === 'X') {
+                    handleKeyPress();
+                }
+            });
+            
+            // Para dispositivos táctiles
+            keyElement.addEventListener('mousedown', handleKeyPress);
+            keyElement.addEventListener('touchstart', handleKeyPress);
+            
+            drawStaticCanvas();
+        }
+        
+        // Iniciar el juego
+        function startGame() {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = Date.now();
+                currentBeatIndex = 0;
+                score = 0;
+                combo = 0;
+                maxCombo = 0;
+                accuracy = 100;
+                totalHits = 0;
+                successfulHits = 0;
+                
+                updateUI();
+                
+                // Crear puntos de ritmo
+                rhythmPoints = [];
+                rhythmData.forEach(time => {
+                    rhythmPoints.push({
+                        time: time,
+                        state: 'approaching', // approaching, hit, missed
+                        y: 0,
+                        hitTime: 0
+                    });
+                });
+                
+                startBtn.textContent = 'Pausar';
+                animationId = requestAnimationFrame(gameLoop);
+            } else {
+                isRunning = false;
+                startBtn.textContent = 'Continuar';
+                cancelAnimationFrame(animationId);
+            }
+        }
+        
+        // Reiniciar el juego
+        function resetGame() {
+            isRunning = false;
+            startBtn.textContent = 'Comenzar Juego';
+            cancelAnimationFrame(animationId);
+            currentBeatIndex = 0;
+            drawStaticCanvas();
+        }
+        
+        // Bucle principal del juego
+        function gameLoop() {
+            if (!isRunning) return;
+            
+            const currentTime = Date.now() - startTime;
+            
+            // Actualizar posición de los beats
+            updateBeats(currentTime);
+            
+            // Dibujar el juego
+            drawGame(currentTime);
+            
+            // Verificar si el juego ha terminado
+            if (currentBeatIndex >= rhythmPoints.length && currentTime > rhythmData[rhythmData.length - 1] + 1000) {
+                endGame();
+                return;
+            }
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Actualizar la posición de los beats
+        function updateBeats(currentTime) {
+            const approachTime = 2000; // 2 segundos para acercarse
+            
+            for (let i = currentBeatIndex; i < rhythmPoints.length; i++) {
+                const point = rhythmPoints[i];
+                
+                // Si el beat está por llegar
+                if (currentTime >= point.time - approachTime && point.state === 'approaching') {
+                    point.y = ((currentTime - (point.time - approachTime)) / approachTime) * (canvas.height / 2);
+                }
+                
+                // Si el beat ha pasado el punto de hit
+                if (currentTime > point.time + 300 && point.state === 'approaching') {
+                    point.state = 'missed';
+                    combo = 0;
+                    updateComboText("¡Fallaste!");
+                    currentBeatIndex = i + 1;
+                }
+                
+                // Si el beat está en el futuro, salir del bucle
+                if (currentTime < point.time - approachTime) {
+                    break;
+                }
+            }
+        }
+        
+        // Dibujar el juego
+        function drawGame(currentTime) {
+            // Limpiar el canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar línea central
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+            
+            // Dibujar beats
+            rhythmPoints.forEach(point => {
+                if (point.state === 'approaching') {
+                    const size = 30 - (point.y / (canvas.height / 2)) * 15;
+                    
+                    // Color gradual según se acerca
+                    const green = Math.max(0, 255 - (point.y / (canvas.height / 2)) * 255);
+                    const red = (point.y / (canvas.height / 2)) * 255;
+                    ctx.fillStyle = `rgb(${red}, ${green}, 100)`;
+                    
+                    ctx.beginPath();
+                    ctx.arc(canvas.width / 2, canvas.height / 2 - point.y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else if (point.state === 'hit') {
+                    // Efecto de hit
+                    const elapsed = currentTime - point.hitTime;
+                    if (elapsed < 300) {
+                        const alpha = 1 - (elapsed / 300);
+                        const size = 30 + (elapsed / 300) * 50;
+                        
+                        ctx.strokeStyle = `rgba(0, 255, 100, ${alpha})`;
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(canvas.width / 2, canvas.height / 2, size, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+            });
+            
+            // Dibujar información de juego
+            ctx.font = '16px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Tiempo: ${(currentTime / 1000).toFixed(1)}s`, 20, 30);
+            ctx.fillText(`Beats: ${currentBeatIndex}/${rhythmPoints.length}`, 20, 60);
+        }
+        
+        // Dibujar canvas estático
+        function drawStaticCanvas() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = '24px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText('Presiona "Comenzar Juego" para iniciar', canvas.width / 2, canvas.height / 2);
+        }
+        
+        // Manejar la pulsación de tecla
+        function handleKeyPress() {
+            if (!isRunning) return;
+            
+            const currentTime = Date.now() - startTime;
+            keyElement.classList.add('pressed');
+            setTimeout(() => keyElement.classList.remove('pressed'), 100);
+            
+            // Buscar el beat más cercano
+            let closestBeat = null;
+            let minDiff = Infinity;
+            
+            for (let i = currentBeatIndex; i < rhythmPoints.length; i++) {
+                const point = rhythmPoints[i];
+                if (point.state !== 'approaching') continue;
+                
+                const diff = Math.abs(point.time - currentTime);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestBeat = point;
+                }
+                
+                // Si el beat está en el futuro, dejar de buscar
+                if (point.time > currentTime + 300) break;
+            }
+            
+            // Verificar si el hit fue exitoso
+            if (closestBeat && minDiff < 300) {
+                closestBeat.state = 'hit';
+                closestBeat.hitTime = currentTime;
+                currentBeatIndex++;
+                
+                // Calcular puntuación basada en la precisión
+                let hitScore = 0;
+                let accuracyText = "";
+                
+                if (minDiff < 50) {
+                    hitScore = 100;
+                    accuracyText = "PERFECTO!";
+                } else if (minDiff < 100) {
+                    hitScore = 80;
+                    accuracyText = "GENIAL!";
+                } else if (minDiff < 200) {
+                    hitScore = 50;
+                    accuracyText = "BIEN!";
+                } else {
+                    hitScore = 20;
+                    accuracyText = "REGULAR";
+                }
+                
+                // Aumentar combo y puntuación
+                combo++;
+                if (combo > maxCombo) maxCombo = combo;
+                score += hitScore * (1 + combo / 10);
+                
+                // Actualizar precisión
+                totalHits++;
+                successfulHits++;
+                accuracy = (successfulHits / totalHits) * 100;
+                
+                // Mostrar texto de precisión
+                showAccuracyText(accuracyText);
+                updateComboText(`Combo x${combo}!`);
+            } else {
+                // Fallo
+                combo = 0;
+                totalHits++;
+                accuracy = (successfulHits / totalHits) * 100;
+                updateComboText("¡Fallaste!");
+            }
+            
+            updateUI();
+        }
+        
+        // Mostrar texto de precisión
+        function showAccuracyText(text) {
+            const accuracyDisplay = document.createElement('div');
+            accuracyDisplay.className = 'accuracy-display';
+            accuracyDisplay.textContent = text;
+            accuracyDisplay.style.color = getAccuracyColor(text);
+            
+            document.body.appendChild(accuracyDisplay);
+            
+            // Posicionar en el centro
+            accuracyDisplay.style.left = `${canvas.offsetLeft + canvas.width / 2 - accuracyDisplay.offsetWidth / 2}px`;
+            accuracyDisplay.style.top = `${canvas.offsetTop + canvas.height / 2 - 50}px`;
+            accuracyDisplay.style.opacity = '1';
+            
+            // Desvanecer
+            setTimeout(() => {
+                accuracyDisplay.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(accuracyDisplay);
+                }, 300);
+            }, 1000);
+        }
+        
+        // Obtener color según la precisión
+        function getAccuracyColor(text) {
+            switch(text) {
+                case "PERFECTO!": return "#00ffaa";
+                case "GENIAL!": return "#55ff00";
+                case "BIEN!": return "#ffdd00";
+                case "REGULAR": return "#ff8800";
+                default: return "white";
+            }
+        }
+        
+        // Actualizar texto de combo
+        function updateComboText(text) {
+            comboTextElement.textContent = text;
+            comboTextElement.style.color = combo > 0 ? "#00ffaa" : "#ff5555";
+            
+            if (combo > 0) {
+                comboTextElement.style.fontSize = `${1.2 + combo * 0.05}rem`;
+            } else {
+                comboTextElement.style.fontSize = "1.2rem";
+            }
+        }
+        
+        // Actualizar la interfaz de usuario
+        function updateUI() {
+            scoreElement.textContent = Math.floor(score);
+            accuracyElement.textContent = `${accuracy.toFixed(1)}%`;
+            comboElement.textContent = combo;
+        }
+        
+        // Finalizar el juego
+        function endGame() {
+            isRunning = false;
+            cancelAnimationFrame(animationId);
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = '36px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText('¡Juego Terminado!', canvas.width / 2, canvas.height / 2 - 50);
+            
+            ctx.font = '24px Arial';
+            ctx.fillText(`Puntuación: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2);
+            ctx.fillText(`Precisión: ${accuracy.toFixed(1)}%`, canvas.width / 2, canvas.height / 2 + 40);
+            ctx.fillText(`Combo Máximo: ${maxCombo}`, canvas.width / 2, canvas.height / 2 + 80);
+            
+            startBtn.textContent = 'Jugar de Nuevo';
+        }
+        
+        // Iniciar la aplicación cuando se cargue la página
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
