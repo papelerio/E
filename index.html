@@ -3,587 +3,1249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego Rítmico</title>
+    <title>Reproductor de Niveles</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            color: #ecf0f1;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
             padding: 20px;
             overflow: hidden;
         }
         
-        .container {
+        header {
+            text-align: center;
+            margin-bottom: 20px;
             width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            text-align: center;
+            color: #3498db;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
         
-        .score-container {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
+        .subtitle {
+            color: #bdc3c7;
             margin-bottom: 20px;
         }
         
-        .score-box {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            border-radius: 10px;
-            text-align: center;
-            min-width: 100px;
-        }
-        
-        .score-title {
-            font-size: 1rem;
-            margin-bottom: 5px;
-        }
-        
-        .score-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-        
-        #gameCanvas {
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            margin: 20px 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        .hit-line {
-            position: absolute;
+        .main-container {
+            display: flex;
+            gap: 20px;
             width: 100%;
-            height: 4px;
-            background: white;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .game-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ui-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: rgba(44, 62, 80, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .upload-section {
+            text-align: center;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+            font-weight: bold;
+            width: 100%;
+        }
+        
+        .file-label:hover {
+            background: #2980b9;
+        }
+        
+        .info-panel h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
         }
         
         .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .control-item {
             display: flex;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        button {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        button:hover {
-            background: #ff8e8e;
-            transform: translateY(-2px);
-        }
-        
-        #startBtn {
-            background: #4CAF50;
-        }
-        
-        #startBtn:hover {
-            background: #66BB6A;
-        }
-        
-        .instructions {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            text-align: center;
-            max-width: 500px;
-        }
-        
-        .key-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
+            align-items: center;
+            gap: 8px;
         }
         
         .key {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
+            background: #34495e;
+            padding: 5px 10px;
+            border-radius: 5px;
             font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.1s;
-            user-select: none;
-        }
-        
-        .key.pressed {
-            transform: scale(0.95);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(135deg, #64b5f6, #42a5f5);
-        }
-        
-        .accuracy-display {
-            position: absolute;
-            font-size: 1.5rem;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.3s;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .combo {
-            font-size: 1.2rem;
-            margin-top: 10px;
+            min-width: 40px;
             text-align: center;
         }
         
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .score-box {
-                padding: 8px 15px;
-                min-width: 80px;
-            }
-            
-            .score-value {
-                font-size: 1.5rem;
-            }
-            
-            button {
-                padding: 15px 20px;
-                font-size: 14px;
-            }
-            
-            .key {
-                width: 70px;
-                height: 70px;
-                font-size: 1.7rem;
-            }
+        #gameCanvas {
+            background: #87ceeb;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            display: block;
+            width: 100%;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(44, 62, 80, 0.7);
+            border-radius: 8px;
+        }
+        
+        .btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: #27ae60;
+        }
+        
+        .btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .success {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            display: block;
+        }
+        
+        .error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            display: block;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #3498db;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .game-area {
+            position: relative;
+        }
+        
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat {
+            background: rgba(52, 73, 94, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(44, 62, 80, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 100;
+        }
+        
+        .game-over h2 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .victory {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 101;
+            display: none;
+        }
+        
+        .victory-content {
+            background: rgba(44, 62, 80, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 0 30px rgba(46, 204, 113, 0.5);
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .close-btn:hover {
+            background: #c0392b;
+        }
+        
+        .victory h2 {
+            color: #2ecc71;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.7);
+        }
+        
+        .victory-message {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: #ecf0f1;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f00;
+            opacity: 0.8;
+            border-radius: 0;
+        }
+        
+        @keyframes fall {
+            from { transform: translateY(-100px) rotate(0deg); }
+            to { transform: translateY(1000px) rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Ritmo Perfecto</h1>
-        
-        <div class="score-container">
-            <div class="score-box">
-                <div class="score-title">PUNTUACIÓN</div>
-                <div id="score" class="score-value">0</div>
+    <header>
+        <h1>Reproductor de Niveles</h1>
+        <p class="subtitle">Carga tu archivo JSON y juega el nivel que has creado</p>
+    </header>
+    
+    <div class="main-container">
+        <div class="game-container">
+            <div class="game-area">
+                <canvas id="gameCanvas" width="800" height="500"></canvas>
+                <div id="loading" class="loading">Cargando recursos...</div>
+                <div id="gameOver" class="game-over">
+                    <h2>Perdiste: ¿Reiniciar?</h2>
+                    <button id="restartBtn" class="btn">Reiniciar</button>
+                </div>
+                <div id="victoryScreen" class="victory">
+                    <div class="victory-content">
+                        <button id="closeVictoryBtn" class="close-btn">X</button>
+                        <h2>¡Felicidades!</h2>
+                        <p class="victory-message">¡Bien hecho viejo!</p>
+                    </div>
+                </div>
             </div>
-            <div class="score-box">
-                <div class="score-title">PRECISIÓN</div>
-                <div id="accuracy" class="score-value">100%</div>
+            
+            <div class="status-bar">
+                <div class="game-stats">
+                    <div class="stat">
+                        <div>Posición X</div>
+                        <div id="playerX" class="stat-value">0</div>
+                    </div>
+                    <div class="stat">
+                        <div>Posición Y</div>
+                        <div id="playerY" class="stat-value">0</div>
+                    </div>
+                    <div class="stat">
+                        <div>Velocidad X</div>
+                        <div id="playerVX" class="stat-value">0</div>
+                    </div>
+                    <div class="stat">
+                        <div>Velocidad Y</div>
+                        <div id="playerVY" class="stat-value">0</div>
+                    </div>
+                    <div class="stat">
+                        <div>Vidas</div>
+                        <div id="playerLives" class="stat-value">1</div>
+                    </div>
+                </div>
             </div>
-            <div class="score-box">
-                <div class="score-title">COMBO</div>
-                <div id="combo" class="score-value">0</div>
+        </div>
+        
+        <div class="ui-container">
+            <div class="panel upload-section">
+                <h3>Cargar Nivel</h3>
+                <input type="file" id="jsonFile" class="file-input" accept=".json">
+                <label for="jsonFile" class="file-label">Seleccionar Archivo JSON</label>
+                <p id="fileName">No se ha seleccionado ningún archivo</p>
+                
+                <div id="playButtonContainer">
+                    <button id="playBtn" class="btn" disabled>Jugar</button>
+                </div>
+                
+                <button id="resetBtn" class="btn btn-danger" disabled>Reiniciar Nivel</button>
             </div>
+            
+            <div class="panel info-panel">
+                <h3>Controles del Juego</h3>
+                <div class="controls">
+                    <div class="control-item">
+                        <span class="key">A</span>
+                        <span>Mover izquierda</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">D</span>
+                        <span>Mover derecha</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">W</span>
+                        <span>Saltar</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">R</span>
+                        <span>Reiniciar nivel</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel info-panel">
+                <h3>Información del Nivel</h3>
+                <p id="viewModeInfo">Modo de cámara: No especificado</p>
+                <p id="tilesInfo">Cantidad de tiles: 0</p>
+                <p id="texturesInfo">Texturas cargadas: 0/0</p>
+                <p id="playerStartInfo">Posición inicial: No encontrada</p>
+                <p id="playerEndInfo">Meta: No encontrada</p>
+            </div>
+            
+            <div id="message" class="message"></div>
         </div>
-        
-        <div class="hit-line" style="top: 50%;"></div>
-        <canvas id="gameCanvas" width="700" height="400"></canvas>
-        
-        <div class="instructions">
-            <p>Presiona la tecla <strong>X</strong> cuando los círculos lleguen a la línea central</p>
-            <p>Sincroniza tu ritmo con la música</p>
-        </div>
-        
-        <div class="key-container">
-            <div class="key" id="key">X</div>
-        </div>
-        
-        <div class="controls">
-            <button id="startBtn">Comenzar Juego</button>
-            <button id="resetBtn">Reiniciar</button>
-        </div>
-        
-        <div id="comboText" class="combo"></div>
     </div>
 
     <script>
-        // Datos proporcionados (tiempos en milisegundos)
-        const rhythmData = [1959,5628,8904,12381,13278,14156,14935];
-            
-        // Variables del juego
-        let score = 0;
-        let combo = 0;
-        let maxCombo = 0;
-        let accuracy = 100;
-        let totalHits = 0;
-        let successfulHits = 0;
-        let startTime = 0;
-        let isRunning = false;
-        let animationId = null;
-        let rhythmPoints = [];
-        let currentBeatIndex = 0;
-        
-        // Elementos del DOM
-        const scoreElement = document.getElementById('score');
-        const accuracyElement = document.getElementById('accuracy');
-        const comboElement = document.getElementById('combo');
-        const comboTextElement = document.getElementById('comboText');
-        const startBtn = document.getElementById('startBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const keyElement = document.getElementById('key');
+        // Variables globales
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        
-        // Inicializar el juego
-        function init() {
-            startBtn.addEventListener('click', startGame);
-            resetBtn.addEventListener('click', resetGame);
+        const playBtn = document.getElementById('playBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const jsonFileInput = document.getElementById('jsonFile');
+        const fileName = document.getElementById('fileName');
+        const message = document.getElementById('message');
+        const loading = document.getElementById('loading');
+        const viewModeInfo = document.getElementById('viewModeInfo');
+        const tilesInfo = document.getElementById('tilesInfo');
+        const texturesInfo = document.getElementById('texturesInfo');
+        const playerStartInfo = document.getElementById('playerStartInfo');
+        const playerEndInfo = document.getElementById('playerEndInfo');
+        const playerX = document.getElementById('playerX');
+        const playerY = document.getElementById('playerY');
+        const playerVX = document.getElementById('playerVX');
+        const playerVY = document.getElementById('playerVY');
+        const playerLives = document.getElementById('playerLives');
+        const playButtonContainer = document.getElementById('playButtonContainer');
+        const gameOver = document.getElementById('gameOver');
+        const restartBtn = document.getElementById('restartBtn');
+        const victoryScreen = document.getElementById('victoryScreen');
+        const closeVictoryBtn = document.getElementById('closeVictoryBtn');
+
+        let mapData = {}, originalMapData = {}, textures = [], tags = [], viewMode = 'static';
+        let player = { 
+            x: 0, y: 0, w: 32, h: 32, vx: 0, vy: 0, 
+            speed: 4, jumping: false, gravity: 0.5, 
+            lives: 1, invincibleUntil: 0 
+        };
+        let boxes = []; // Lista de cajas móviles
+        let keys = {};
+        let camera = { x: 0, y: 0 };
+        let globalScale = 1;
+        let gameStarted = false;
+        let texturesLoaded = 0;
+        let totalTextures = 0;
+        let gameLoopId = null;
+        let startPosition = { x: 0, y: 0 };
+        let endPositions = []; // Múltiples posiciones de meta
+        const heartTextureUrl = 'https://png.pngtree.com/png-vector/20250802/ourmid/pngtree-red-pixel-heart-decorative-element-love-shape-png-image_16987680.webp';
+
+        // Event Listeners
+        jsonFileInput.addEventListener('change', handleFileSelect);
+        playBtn.addEventListener('click', startGame);
+        resetBtn.addEventListener('click', resetGame);
+        restartBtn.addEventListener('click', resetGame);
+        closeVictoryBtn.addEventListener('click', closeVictory);
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+
+        // Cerrar ventana de victoria
+        function closeVictory() {
+            victoryScreen.style.display = 'none';
+            resetBtn.disabled = false;
+            playButtonContainer.innerHTML = '<button id="playBtn" class="btn">Jugar</button>';
+            document.getElementById('playBtn').addEventListener('click', startGame);
+        }
+
+        // Manejar selección de archivo
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             
-            // Escuchar la tecla X
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'x' || e.key === 'X') {
-                    handleKeyPress();
+            fileName.textContent = file.name;
+            message.className = 'message';
+            message.textContent = '';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    loadGameData(json);
+                    showMessage("JSON cargado correctamente. Haz clic en Jugar para comenzar.", 'success');
+                    playBtn.disabled = false;
+                } catch (error) {
+                    showMessage("Error al parsear el JSON: " + error.message, 'error');
+                    playBtn.disabled = true;
                 }
-            });
-            
-            // Para dispositivos táctiles
-            keyElement.addEventListener('mousedown', handleKeyPress);
-            keyElement.addEventListener('touchstart', handleKeyPress);
-            
-            drawStaticCanvas();
+            };
+            reader.readAsText(file);
         }
-        
-        // Iniciar el juego
-        function startGame() {
-            if (!isRunning) {
-                isRunning = true;
-                startTime = Date.now();
-                currentBeatIndex = 0;
-                score = 0;
-                combo = 0;
-                maxCombo = 0;
-                accuracy = 100;
-                totalHits = 0;
-                successfulHits = 0;
-                
-                updateUI();
-                
-                // Crear puntos de ritmo
-                rhythmPoints = [];
-                rhythmData.forEach(time => {
-                    rhythmPoints.push({
-                        time: time,
-                        state: 'approaching', // approaching, hit, missed
-                        y: 0,
-                        hitTime: 0
-                    });
-                });
-                
-                startBtn.textContent = 'Pausar';
-                animationId = requestAnimationFrame(gameLoop);
-            } else {
-                isRunning = false;
-                startBtn.textContent = 'Continuar';
-                cancelAnimationFrame(animationId);
+
+        // Cargar datos del juego
+        function loadGameData(json) {
+            // Detener el juego si está en ejecución
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
             }
+            
+            gameStarted = false;
+            mapData = JSON.parse(JSON.stringify(json.map || {}));
+            originalMapData = JSON.parse(JSON.stringify(json.map || {})); // Guardar copia
+            tags = json.tags || [];
+            viewMode = json.viewMode || 'static';
+            
+            // Buscar posición inicial, final y cajas
+            startPosition = { x: 0, y: 0 };
+            endPositions = []; // Reiniciar posiciones de meta
+            boxes = [];
+            for (let key in mapData) {
+                const cell = mapData[key];
+                const [x, y] = key.split(',').map(Number);
+                if (cell.type === 'evento' && cell.event === 1) {
+                    startPosition = { x: x * 32, y: y * 32 };
+                }
+                if (cell.type === 'evento' && cell.event === 2) {
+                    endPositions.push({ x: x * 32, y: y * 32, w: 32, h: 32 });
+                }
+                if (cell.type === 'masa' && cell.tags && cell.tags.includes('caja')) {
+                    boxes.push({
+                        x: x * 32,
+                        y: y * 32,
+                        w: 32,
+                        h: 32,
+                        vx: 0,
+                        vy: 0,
+                        texture: cell.texture,
+                        key: key
+                    });
+                    delete mapData[key]; // Remover caja de mapData
+                }
+            }
+            
+            // Actualizar información del nivel
+            viewModeInfo.textContent = `Modo de cámara: ${viewMode}`;
+            tilesInfo.textContent = `Cantidad de tiles: ${Object.keys(mapData).length}`;
+            playerStartInfo.textContent = `Posición inicial: ${startPosition.x}, ${startPosition.y}`;
+            playerEndInfo.textContent = endPositions.length > 0 
+                ? `Metas: ${endPositions.length}` 
+                : 'Meta: No encontrada';
+            
+            // Cargar texturas
+            textures = [];
+            texturesLoaded = 0;
+            // Incluir la textura del corazón
+            const textureUrls = (json.textures || []).concat([heartTextureUrl]);
+            totalTextures = textureUrls.length;
+            texturesInfo.textContent = `Texturas cargadas: 0/${totalTextures}`;
+            
+            if (totalTextures > 0) {
+                loading.style.display = 'block';
+            }
+            
+            textureUrls.forEach(url => {
+                const img = new Image();
+                img.onload = () => {
+                    texturesLoaded++;
+                    texturesInfo.textContent = `Texturas cargadas: ${texturesLoaded}/${totalTextures}`;
+                    
+                    if (texturesLoaded === totalTextures) {
+                        loading.style.display = 'none';
+                    }
+                };
+                img.onerror = () => {
+                    console.error("Error cargando textura: ", url);
+                    texturesLoaded++;
+                    texturesInfo.textContent = `Texturas cargadas: ${texturesLoaded}/${totalTextures}`;
+                    
+                    if (texturesLoaded === totalTextures) {
+                        loading.style.display = 'none';
+                    }
+                };
+                img.src = url;
+                textures.push({ url, img });
+            });
         }
-        
-        // Reiniciar el juego
-        function resetGame() {
-            isRunning = false;
-            startBtn.textContent = 'Comenzar Juego';
-            cancelAnimationFrame(animationId);
-            currentBeatIndex = 0;
-            drawStaticCanvas();
-        }
-        
-        // Bucle principal del juego
-        function gameLoop() {
-            if (!isRunning) return;
-            
-            const currentTime = Date.now() - startTime;
-            
-            // Actualizar posición de los beats
-            updateBeats(currentTime);
-            
-            // Dibujar el juego
-            drawGame(currentTime);
-            
-            // Verificar si el juego ha terminado
-            if (currentBeatIndex >= rhythmPoints.length && currentTime > rhythmData[rhythmData.length - 1] + 1000) {
-                endGame();
+
+        // Iniciar juego
+        function startGame() {
+            if (texturesLoaded < totalTextures) {
+                showMessage("Esperando a que se carguen las texturas...", 'error');
                 return;
             }
             
-            animationId = requestAnimationFrame(gameLoop);
-        }
-        
-        // Actualizar la posición de los beats
-        function updateBeats(currentTime) {
-            const approachTime = 2000; // 2 segundos para acercarse
+            // Restaurar mapData
+            mapData = JSON.parse(JSON.stringify(originalMapData));
             
-            for (let i = currentBeatIndex; i < rhythmPoints.length; i++) {
-                const point = rhythmPoints[i];
+            // Configurar jugador
+            player.x = startPosition.x;
+            player.y = startPosition.y;
+            player.vx = 0;
+            player.vy = 0;
+            player.jumping = false;
+            player.lives = 1;
+            player.invincibleUntil = 0;
+            playerLives.textContent = player.lives;
+            
+            // Reiniciar cajas
+            boxes = [];
+            for (let key in mapData) {
+                const cell = mapData[key];
+                const [x, y] = key.split(',').map(Number);
+                if (cell.type === 'masa' && cell.tags && cell.tags.includes('caja')) {
+                    boxes.push({
+                        x: x * 32,
+                        y: y * 32,
+                        w: 32,
+                        h: 32,
+                        vx: 0,
+                        vy: 0,
+                        texture: cell.texture,
+                        key: key
+                    });
+                    delete mapData[key];
+                }
+            }
+            
+            // Configurar cámara según viewMode
+            setupCamera();
+            
+            gameStarted = true;
+            resetBtn.disabled = false;
+            message.style.display = 'none';
+            gameOver.style.display = 'none';
+            victoryScreen.style.display = 'none';
+            
+            // Actualizar información de tiles
+            tilesInfo.textContent = `Cantidad de tiles: ${Object.keys(mapData).length}`;
+            
+            // Eliminar botón de jugar para evitar múltiples clics
+            playButtonContainer.innerHTML = '<p class="success">Juego en progreso</p>';
+            
+            // Iniciar bucle del juego
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        // Configurar cámara
+        function setupCamera() {
+            if (viewMode === 'static') {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                 
-                // Si el beat está por llegar
-                if (currentTime >= point.time - approachTime && point.state === 'approaching') {
-                    point.y = ((currentTime - (point.time - approachTime)) / approachTime) * (canvas.height / 2);
+                for (let key in mapData) {
+                    const [x, y] = key.split(',').map(Number);
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
                 }
                 
-                // Si el beat ha pasado el punto de hit
-                if (currentTime > point.time + 300 && point.state === 'approaching') {
-                    point.state = 'missed';
-                    combo = 0;
-                    updateComboText("¡Fallaste!");
-                    currentBeatIndex = i + 1;
-                }
+                const levelWidth = (maxX - minX + 1) * 32;
+                const levelHeight = (maxY - minY + 1) * 32;
+                const scaleX = canvas.width / levelWidth;
+                const scaleY = canvas.height / levelHeight;
+                globalScale = Math.min(scaleX, scaleY);
                 
-                // Si el beat está en el futuro, salir del bucle
-                if (currentTime < point.time - approachTime) {
+                camera.x = minX * 32 - (canvas.width / globalScale - levelWidth) / 2;
+                camera.y = minY * 32 - (canvas.height / globalScale - levelHeight) / 2;
+            } else if (viewMode === 'x') {
+                globalScale = 1;
+                camera.x = player.x - canvas.width / 2;
+                // Centrar Y basado en los límites del nivel
+                let minY = Infinity, maxY = -Infinity;
+                for (let key in mapData) {
+                    const [, y] = key.split(',').map(Number);
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+                const levelHeight = (maxY - minY + 1) * 32;
+                camera.y = minY * 32 - (canvas.height - levelHeight) / 2;
+            } else if (viewMode === 'y') {
+                globalScale = 1;
+                camera.y = player.y - canvas.height / 2;
+                // Centrar X basado en los límites del nivel
+                let minX = Infinity, maxX = -Infinity;
+                for (let key in mapData) {
+                    const [x] = key.split(',').map(Number);
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                }
+                const levelWidth = (maxX - minX + 1) * 32;
+                camera.x = minX * 32 - (canvas.width - levelWidth) / 2;
+            } else if (viewMode === 'xy') {
+                globalScale = 1;
+                camera.x = player.x - canvas.width / 2;
+                camera.y = player.y - canvas.height / 2;
+            }
+        }
+
+        // Reiniciar juego
+        function resetGame() {
+            if (!gameStarted) return;
+            
+            // Restaurar mapData
+            mapData = JSON.parse(JSON.stringify(originalMapData));
+            
+            // Reiniciar jugador
+            player.x = startPosition.x;
+            player.y = startPosition.y;
+            player.vx = 0;
+            player.vy = 0;
+            player.jumping = false;
+            player.lives = 1;
+            player.invincibleUntil = 0;
+            playerLives.textContent = player.lives;
+            
+            // Reiniciar cajas
+            boxes = [];
+            for (let key in mapData) {
+                const cell = mapData[key];
+                const [x, y] = key.split(',').map(Number);
+                if (cell.type === 'masa' && cell.tags && cell.tags.includes('caja')) {
+                    boxes.push({
+                        x: x * 32,
+                        y: y * 32,
+                        w: 32,
+                        h: 32,
+                        vx: 0,
+                        vy: 0,
+                        texture: cell.texture,
+                        key: key
+                    });
+                    delete mapData[key];
+                }
+            }
+            
+            // Reiniciar cámara
+            setupCamera();
+            
+            // Actualizar información de tiles
+            tilesInfo.textContent = `Cantidad de tiles: ${Object.keys(mapData).length}`;
+            
+            message.style.display = 'none';
+            gameOver.style.display = 'none';
+            victoryScreen.style.display = 'none';
+        }
+
+        // Mostrar ventana de Game Over
+        function showGameOver() {
+            gameStarted = false;
+            gameOver.style.display = 'block';
+            resetBtn.disabled = true;
+            cancelAnimationFrame(gameLoopId);
+            playButtonContainer.innerHTML = '<button id="playBtn" class="btn">Jugar</button>';
+            document.getElementById('playBtn').addEventListener('click', startGame);
+        }
+
+        // Mostrar pantalla de victoria
+        function showVictory() {
+            gameStarted = false;
+            victoryScreen.style.display = 'flex';
+            resetBtn.disabled = true;
+            cancelAnimationFrame(gameLoopId);
+            
+            // Crear confeti
+            createConfetti();
+        }
+
+        // Crear efecto de confeti
+        function createConfetti() {
+            const colors = ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animation = `fall ${(Math.random() * 5 + 3)}s linear forwards`;
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                document.body.appendChild(confetti);
+                
+                // Eliminar después de la animación
+                setTimeout(() => {
+                    confetti.remove();
+                }, 8000);
+            }
+        }
+
+        // Manejar teclas presionadas
+        function handleKeyDown(e) {
+            keys[e.key] = true;
+            
+            // Reiniciar con R
+            if (e.key === 'r' && gameStarted) {
+                resetGame();
+            }
+        }
+
+        // Manejar teclas liberadas
+        function handleKeyUp(e) {
+            keys[e.key] = false;
+        }
+
+        // Detectar colisiones (tamaño estándar, 32x32)
+        function rectsCollide(ax, ay, aw, ah, bx, by, bw, bh) {
+            return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+        }
+
+        // Detectar colisiones de daño para magma (tamaño expandido, 33x33)
+        function rectsCollideDamage(ax, ay, aw, ah, bx, by, bw, bh) {
+            const offset = 0.5; // Expandir 0.5 píxeles por lado
+            return ax < bx + bw + offset && 
+                   ax + aw > bx - offset && 
+                   ay < by + bh + offset && 
+                   ay + ah > by - offset;
+        }
+
+        // Bucle principal del juego
+        function gameLoop() {
+            if (!gameStarted) return;
+            
+            update();
+            draw();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        // Actualizar estado del juego
+        function update() {
+            // Movimiento horizontal del jugador
+            if (keys['a'] || keys['ArrowLeft']) player.vx = -player.speed;
+            else if (keys['d'] || keys['ArrowRight']) player.vx = player.speed;
+            else player.vx = 0;
+
+            // Verificar si el jugador está pisando fango
+            let inMud = false;
+            for (let key in mapData) {
+                const cell = mapData[key];
+                const [cx, cy] = key.split(',').map(Number);
+                const tile = { x: cx * 32, y: cy * 32, w: 32, h: 32 };
+                if (cell.type === 'masa' && cell.tags && cell.tags.includes('fango') && !cell.tags.includes('transparente') && 
+                    rectsCollide(player.x, player.y, player.w, player.h, tile.x, tile.y, tile.w, tile.h)) {
+                    inMud = true;
                     break;
                 }
             }
-        }
-        
-        // Dibujar el juego
-        function drawGame(currentTime) {
-            // Limpiar el canvas
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Dibujar línea central
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height / 2);
-            ctx.lineTo(canvas.width, canvas.height / 2);
-            ctx.stroke();
-            
-            // Dibujar beats
-            rhythmPoints.forEach(point => {
-                if (point.state === 'approaching') {
-                    const size = 30 - (point.y / (canvas.height / 2)) * 15;
-                    
-                    // Color gradual según se acerca
-                    const green = Math.max(0, 255 - (point.y / (canvas.height / 2)) * 255);
-                    const red = (point.y / (canvas.height / 2)) * 255;
-                    ctx.fillStyle = `rgb(${red}, ${green}, 100)`;
-                    
-                    ctx.beginPath();
-                    ctx.arc(canvas.width / 2, canvas.height / 2 - point.y, size, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                } else if (point.state === 'hit') {
-                    // Efecto de hit
-                    const elapsed = currentTime - point.hitTime;
-                    if (elapsed < 300) {
-                        const alpha = 1 - (elapsed / 300);
-                        const size = 30 + (elapsed / 300) * 50;
-                        
-                        ctx.strokeStyle = `rgba(0, 255, 100, ${alpha})`;
-                        ctx.lineWidth = 3;
-                        ctx.beginPath();
-                        ctx.arc(canvas.width / 2, canvas.height / 2, size, 0, Math.PI * 2);
-                        ctx.stroke();
+
+            // Salto
+            if ((keys['w'] || keys['ArrowUp']) && !player.jumping) {
+                player.vy = -12;
+                player.jumping = true;
+            }
+
+            // Gravedad del jugador
+            player.vy += player.gravity;
+            if (inMud) {
+                player.vy = 0.5; // Desplazamiento lento hacia abajo en fango
+            }
+
+            // Movimiento provisional del jugador
+            let nextX = player.x + player.vx;
+            let nextY = player.y + player.vy;
+
+            // Actualizar cajas
+            boxes.forEach((box, index) => {
+                // Aplicar gravedad
+                box.vy += player.gravity;
+                
+                // Movimiento provisional
+                let boxNextX = box.x + box.vx;
+                let boxNextY = box.y + box.vy;
+
+                // Colisiones de la caja con bloques sólidos
+                for (let key in mapData) {
+                    const cell = mapData[key];
+                    const [cx, cy] = key.split(',').map(Number);
+                    const tile = { x: cx * 32, y: cy * 32, w: 32, h: 32 };
+
+                    if (cell.type === 'masa' && cell.tags && (cell.tags.includes('piso') || cell.tags.includes('ladrillo') || cell.tags.includes('magma')) && !cell.tags.includes('transparente')) {
+                        // Colisión en X
+                        if (rectsCollide(boxNextX, box.y, box.w, box.h, tile.x, tile.y, tile.w, tile.h)) {
+                            if (box.vx > 0) boxNextX = tile.x - box.w;
+                            if (box.vx < 0) boxNextX = tile.x + tile.w;
+                            box.vx = 0;
+                        }
+
+                        // Colisión en Y
+                        if (rectsCollide(box.x, boxNextY, box.w, box.h, tile.x, tile.y, tile.w, tile.h)) {
+                            if (box.vy > 0) {
+                                boxNextY = tile.y - box.h;
+                                box.vy = 0;
+                            }
+                            if (box.vy < 0) {
+                                boxNextY = tile.y + tile.h;
+                                box.vy = 0;
+                            }
+                        }
                     }
                 }
+
+                // Colisiones de la caja con otras cajas
+                for (let i = 0; i < boxes.length; i++) {
+                    if (i !== index) {
+                        const otherBox = boxes[i];
+                        // Colisión en X
+                        if (rectsCollide(boxNextX, box.y, box.w, box.h, otherBox.x, otherBox.y, otherBox.w, otherBox.h)) {
+                            if (box.vx > 0) boxNextX = otherBox.x - box.w;
+                            if (box.vx < 0) boxNextX = otherBox.x + otherBox.w;
+                            box.vx = 0;
+                        }
+                        // Colisión en Y
+                        if (rectsCollide(box.x, boxNextY, box.w, box.h, otherBox.x, otherBox.y, otherBox.w, otherBox.h)) {
+                            if (box.vy > 0) {
+                                boxNextY = otherBox.y - box.h;
+                                box.vy = 0;
+                            }
+                            if (box.vy < 0) {
+                                boxNextY = otherBox.y + otherBox.h;
+                                box.vy = 0;
+                            }
+                        }
+                    }
+                }
+
+                // Colisión de la caja con el jugador
+                box.vx = 0; // Reiniciar velocidad X a menos que el jugador esté empujando
+                if (rectsCollide(nextX, player.y, player.w, player.h, box.x, box.y, box.w, box.h)) {
+                    if (player.vx > 0) {
+                        nextX = box.x - player.w;
+                        box.vx = player.vx; // Empujar caja a la derecha
+                    }
+                    if (player.vx < 0) {
+                        nextX = box.x + box.w;
+                        box.vx = player.vx; // Empujar caja a la izquierda
+                    }
+                }
+
+                if (rectsCollide(player.x, nextY, player.w, player.h, box.x, box.y, box.w, box.h)) {
+                    if (player.vy > 0) {
+                        nextY = box.y - player.h;
+                        player.vy = 0;
+                        player.jumping = false;
+                    }
+                    if (player.vy < 0) {
+                        nextY = box.y + box.h;
+                        player.vy = 0;
+                        box.vy = -2; // Empujar caja hacia arriba
+                    }
+                }
+
+                // Aplicar movimiento
+                box.x = boxNextX;
+                box.y = boxNextY;
+            });
+
+            // Detectar colisiones del jugador con bloques y eventos
+            const now = performance.now();
+            for (let key in mapData) {
+                const cell = mapData[key];
+                const [cx, cy] = key.split(',').map(Number);
+                const tile = { x: cx * 32, y: cy * 32, w: 32, h: 32 };
+
+                // Colisión con bloques sólidos
+                if (cell.type === 'masa' && cell.tags && (cell.tags.includes('piso') || cell.tags.includes('ladrillo') || cell.tags.includes('magma')) && !cell.tags.includes('transparente')) {
+                    // Colisión en X
+                    if (rectsCollide(nextX, player.y, player.w, player.h, tile.x, tile.y, tile.w, tile.h)) {
+                        if (player.vx > 0) nextX = tile.x - player.w;
+                        if (player.vx < 0) nextX = tile.x + tile.w;
+                        player.vx = 0;
+                    }
+
+                    // Colisión en Y
+                    if (rectsCollide(player.x, nextY, player.w, player.h, tile.x, tile.y, tile.w, tile.h)) {
+                        if (player.vy > 0) {
+                            nextY = tile.y - player.h;
+                            player.vy = 0;
+                            player.jumping = false;
+                        }
+                        if (player.vy < 0) {
+                            nextY = tile.y + tile.h;
+                            player.vy = 0;
+                            // Destruir ladrillo si se golpea desde abajo
+                            if (cell.tags.includes('ladrillo')) {
+                                delete mapData[key];
+                                tilesInfo.textContent = `Cantidad de tiles: ${Object.keys(mapData).length}`;
+                            }
+                        }
+                    }
+                }
+
+                // Permitir salto en fango
+                if (cell.type === 'masa' && cell.tags && cell.tags.includes('fango') && !cell.tags.includes('transparente') && 
+                    rectsCollide(player.x, player.y, player.w, player.h, tile.x, tile.y, tile.w, tile.h)) {
+                    player.jumping = false; // Permitir salto en fango
+                }
+
+                // Colisión con lava
+                if (cell.type === 'masa' && cell.tags && cell.tags.includes('lava') && 
+                    rectsCollide(player.x, player.y, player.w, player.h, tile.x, tile.y, tile.w, tile.h)) {
+                    player.lives = 0;
+                    playerLives.textContent = player.lives;
+                    showGameOver();
+                }
+
+                // Colisión con magma (daño en contacto continuo, usando hitbox expandido)
+                if (cell.type === 'masa' && cell.tags && cell.tags.includes('magma') && !cell.tags.includes('transparente') && 
+                    rectsCollideDamage(player.x, player.y, player.w, player.h, tile.x, tile.y, tile.w, tile.h)) {
+                    if (now > player.invincibleUntil && player.lives > 0) {
+                        player.lives = Math.max(0, player.lives - 1);
+                        player.invincibleUntil = now + 1500; // 1.5 segundos de invulnerabilidad
+                        playerLives.textContent = player.lives;
+                        if (player.lives === 0) {
+                            showGameOver();
+                        }
+                    }
+                }
+
+                // Colisión con evento 3 (corazón)
+                if (cell.type === 'evento' && cell.event === 3 && 
+                    rectsCollide(player.x, player.y, player.w, player.h, tile.x, tile.y, tile.w, tile.h)) {
+                    if (player.lives < 5) {
+                        player.lives += 1;
+                        playerLives.textContent = player.lives;
+                    }
+                    delete mapData[key];
+                    tilesInfo.textContent = `Cantidad de tiles: ${Object.keys(mapData).length}`;
+                }
+            }
+
+            // Verificar colisión con metas (evento 2)
+            for (let i = 0; i < endPositions.length; i++) {
+                const endPos = endPositions[i];
+                if (rectsCollide(player.x, player.y, player.w, player.h, endPos.x, endPos.y, endPos.w, endPos.h)) {
+                    showVictory();
+                    return; // Salir de la función para evitar más actualizaciones
+                }
+            }
+
+            // Aplicar movimiento al jugador
+            player.x = nextX;
+            player.y = nextY;
+
+            // Actualizar cámara
+            if (viewMode === 'x') {
+                camera.x = player.x - canvas.width / 2;
+            } else if (viewMode === 'y') {
+                camera.y = player.y - canvas.height / 2;
+            } else if (viewMode === 'xy') {
+                camera.x = player.x - canvas.width / 2;
+                camera.y = player.y - canvas.height / 2;
+            }
+
+            // Actualizar estadísticas
+            playerX.textContent = Math.round(player.x);
+            playerY.textContent = Math.round(player.y);
+            playerVX.textContent = player.vx.toFixed(1);
+            playerVY.textContent = player.vy.toFixed(1);
+        }
+
+        // Dibujar el juego
+        function draw() {
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const scale = (viewMode === 'static') ? globalScale : 1;
+            
+            // Dibujar tiles
+            for (let key in mapData) {
+                const cell = mapData[key];
+                const [x, y] = key.split(',').map(Number);
+                const px = (x * 32 - camera.x) * scale;
+                const py = (y * 32 - camera.y) * scale;
+                const size = 32 * scale;
+                
+                // Dibujar bloques (sólidos y transparentes)
+                if (cell.type === 'masa') {
+                    if (cell.texture) {
+                        const tex = textures.find(t => t.url === cell.texture);
+                        if (tex && tex.img.complete) {
+                            ctx.drawImage(tex.img, px, py, size, size);
+                        } else {
+                            // Fallback: dibujar bloque de color según el tag
+                            ctx.fillStyle = cell.tags.includes('fango') ? '#e74c3c' : 
+                                           cell.tags.includes('lava') ? '#ff0000' : 
+                                           cell.tags.includes('magma') ? '#ff4500' : 
+                                           cell.tags.includes('transparente') ? '#7f8c8d' : '#95a5a6';
+                            ctx.fillRect(px, py, size, size);
+                        }
+                    } else {
+                        ctx.fillStyle = cell.tags.includes('fango') ? '#e74c3c' : 
+                                       cell.tags.includes('lava') ? '#ff0000' : 
+                                       cell.tags.includes('magma') ? '#ff4500' : 
+                                       cell.tags.includes('transparente') ? '#7f8c8d' : '#95a5a6';
+                        ctx.fillRect(px, py, size, size);
+                    }
+                    
+                    // Dibujar borde (excepto para transparentes, fango y lava)
+                    if (!cell.tags.includes('transparente') && !cell.tags.includes('fango') && !cell.tags.includes('lava')) {
+                        ctx.strokeStyle = '#7f8c8d';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(px, py, size, size);
+                    }
+                }
+                
+                // Dibujar evento 2 (meta)
+                if (cell.type === 'evento' && cell.event === 2) {
+                    ctx.fillStyle = '#2ecc71';
+                    ctx.fillRect(px, py, size, size);
+                    
+                    // Dibujar icono de meta
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.moveTo(px + size * 0.3, py + size * 0.5);
+                    ctx.lineTo(px + size * 0.45, py + size * 0.65);
+                    ctx.lineTo(px + size * 0.7, py + size * 0.35);
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+                
+                // Dibujar evento 1 (inicio)
+                if (cell.type === 'evento' && cell.event === 1) {
+                    ctx.fillStyle = '#3498db';
+                    ctx.fillRect(px, py, size, size);
+                    
+                    // Dibujar icono de inicio
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(px + size/2, py + size/2, size/4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Dibujar evento 3 (corazón)
+                if (cell.type === 'evento' && cell.event === 3) {
+                    const heartTex = textures.find(t => t.url === heartTextureUrl);
+                    if (heartTex && heartTex.img.complete) {
+                        ctx.drawImage(heartTex.img, px, py, size, size);
+                    } else {
+                        // Fallback: dibujar corazón rojo
+                        ctx.fillStyle = '#ff0000';
+                        ctx.beginPath();
+                        ctx.moveTo(px + size/2, py + size * 0.3);
+                        ctx.bezierCurveTo(
+                            px + size * 0.3, py + size * 0.1,
+                            px + size * 0.2, py + size * 0.3,
+                            px + size/2, py + size * 0.5
+                        );
+                        ctx.moveTo(px + size/2, py + size * 0.3);
+                        ctx.bezierCurveTo(
+                            px + size * 0.7, py + size * 0.1,
+                            px + size * 0.8, py + size * 0.3,
+                            px + size/2, py + size * 0.5
+                        );
+                        ctx.fill();
+                    }
+                }
+            }
+            
+            // Dibujar cajas
+            boxes.forEach(box => {
+                const px = (box.x - camera.x) * scale;
+                const py = (box.y - camera.y) * scale;
+                const size = 32 * scale;
+                
+                if (box.texture) {
+                    const tex = textures.find(t => t.url === box.texture);
+                    if (tex && tex.img.complete) {
+                        ctx.drawImage(tex.img, px, py, size, size);
+                    } else {
+                        ctx.fillStyle = '#8B4513'; // Color marrón para cajas
+                        ctx.fillRect(px, py, size, size);
+                    }
+                } else {
+                    ctx.fillStyle = '#8B4513';
+                    ctx.fillRect(px, py, size, size);
+                }
+                
+                ctx.strokeStyle = '#7f8c8d';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(px, py, size, size);
             });
             
-            // Dibujar información de juego
-            ctx.font = '16px Arial';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Tiempo: ${(currentTime / 1000).toFixed(1)}s`, 20, 30);
-            ctx.fillText(`Beats: ${currentBeatIndex}/${rhythmPoints.length}`, 20, 60);
-        }
-        
-        // Dibujar canvas estático
-        function drawStaticCanvas() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.font = '24px Arial';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText('Presiona "Comenzar Juego" para iniciar', canvas.width / 2, canvas.height / 2);
-        }
-        
-        // Manejar la pulsación de tecla
-        function handleKeyPress() {
-            if (!isRunning) return;
-            
-            const currentTime = Date.now() - startTime;
-            keyElement.classList.add('pressed');
-            setTimeout(() => keyElement.classList.remove('pressed'), 100);
-            
-            // Buscar el beat más cercano
-            let closestBeat = null;
-            let minDiff = Infinity;
-            
-            for (let i = currentBeatIndex; i < rhythmPoints.length; i++) {
-                const point = rhythmPoints[i];
-                if (point.state !== 'approaching') continue;
+            // Dibujar jugador (parpadea si está en i-frames)
+            const now = performance.now();
+            if (now > player.invincibleUntil || Math.floor(now / 100) % 2 === 0) {
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(
+                    (player.x - camera.x) * scale, 
+                    (player.y - camera.y) * scale, 
+                    player.w * scale, 
+                    player.h * scale
+                );
                 
-                const diff = Math.abs(point.time - currentTime);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closestBeat = point;
-                }
-                
-                // Si el beat está en el futuro, dejar de buscar
-                if (point.time > currentTime + 300) break;
+                // Dibujar ojos al jugador
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(
+                    (player.x - camera.x) * scale + 6 * scale, 
+                    (player.y - camera.y) * scale + 8 * scale, 
+                    5 * scale, 
+                    5 * scale
+                );
+                ctx.fillRect(
+                    (player.x - camera.x) * scale + 21 * scale, 
+                    (player.y - camera.y) * scale + 8 * scale, 
+                    5 * scale, 
+                    5 * scale
+                );
             }
-            
-            // Verificar si el hit fue exitoso
-            if (closestBeat && minDiff < 300) {
-                closestBeat.state = 'hit';
-                closestBeat.hitTime = currentTime;
-                currentBeatIndex++;
-                
-                // Calcular puntuación basada en la precisión
-                let hitScore = 0;
-                let accuracyText = "";
-                
-                if (minDiff < 50) {
-                    hitScore = 100;
-                    accuracyText = "PERFECTO!";
-                } else if (minDiff < 100) {
-                    hitScore = 80;
-                    accuracyText = "GENIAL!";
-                } else if (minDiff < 200) {
-                    hitScore = 50;
-                    accuracyText = "BIEN!";
+
+            // Dibujar corazones de vidas en la esquina superior izquierda
+            const heartSize = 24;
+            const heartSpacing = 5;
+            const heartTex = textures.find(t => t.url === heartTextureUrl);
+            for (let i = 0; i < player.lives; i++) {
+                const heartX = 10 + i * (heartSize + heartSpacing);
+                const heartY = 10;
+                if (heartTex && heartTex.img.complete) {
+                    ctx.drawImage(heartTex.img, heartX, heartY, heartSize, heartSize);
                 } else {
-                    hitScore = 20;
-                    accuracyText = "REGULAR";
+                    // Fallback: dibujar corazón rojo
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    ctx.moveTo(heartX + heartSize/2, heartY + heartSize * 0.3);
+                    ctx.bezierCurveTo(
+                        heartX + heartSize * 0.3, heartY + heartSize * 0.1,
+                        heartX + heartSize * 0.2, heartY + heartSize * 0.3,
+                        heartX + heartSize/2, heartY + heartSize * 0.5
+                    );
+                    ctx.moveTo(heartX + heartSize/2, heartY + heartSize * 0.3);
+                    ctx.bezierCurveTo(
+                        heartX + heartSize * 0.7, heartY + heartSize * 0.1,
+                        heartX + heartSize * 0.8, heartY + heartSize * 0.3,
+                        heartX + heartSize/2, heartY + heartSize * 0.5
+                    );
+                    ctx.fill();
                 }
-                
-                // Aumentar combo y puntuación
-                combo++;
-                if (combo > maxCombo) maxCombo = combo;
-                score += hitScore * (1 + combo / 10);
-                
-                // Actualizar precisión
-                totalHits++;
-                successfulHits++;
-                accuracy = (successfulHits / totalHits) * 100;
-                
-                // Mostrar texto de precisión
-                showAccuracyText(accuracyText);
-                updateComboText(`Combo x${combo}!`);
-            } else {
-                // Fallo
-                combo = 0;
-                totalHits++;
-                accuracy = (successfulHits / totalHits) * 100;
-                updateComboText("¡Fallaste!");
-            }
-            
-            updateUI();
-        }
-        
-        // Mostrar texto de precisión
-        function showAccuracyText(text) {
-            const accuracyDisplay = document.createElement('div');
-            accuracyDisplay.className = 'accuracy-display';
-            accuracyDisplay.textContent = text;
-            accuracyDisplay.style.color = getAccuracyColor(text);
-            
-            document.body.appendChild(accuracyDisplay);
-            
-            // Posicionar en el centro
-            accuracyDisplay.style.left = `${canvas.offsetLeft + canvas.width / 2 - accuracyDisplay.offsetWidth / 2}px`;
-            accuracyDisplay.style.top = `${canvas.offsetTop + canvas.height / 2 - 50}px`;
-            accuracyDisplay.style.opacity = '1';
-            
-            // Desvanecer
-            setTimeout(() => {
-                accuracyDisplay.style.opacity = '0';
-                setTimeout(() => {
-                    document.body.removeChild(accuracyDisplay);
-                }, 300);
-            }, 1000);
-        }
-        
-        // Obtener color según la precisión
-        function getAccuracyColor(text) {
-            switch(text) {
-                case "PERFECTO!": return "#00ffaa";
-                case "GENIAL!": return "#55ff00";
-                case "BIEN!": return "#ffdd00";
-                case "REGULAR": return "#ff8800";
-                default: return "white";
             }
         }
-        
-        // Actualizar texto de combo
-        function updateComboText(text) {
-            comboTextElement.textContent = text;
-            comboTextElement.style.color = combo > 0 ? "#00ffaa" : "#ff5555";
-            
-            if (combo > 0) {
-                comboTextElement.style.fontSize = `${1.2 + combo * 0.05}rem`;
-            } else {
-                comboTextElement.style.fontSize = "1.2rem";
-            }
+
+        // Mostrar mensajes
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = 'message ' + type;
+            message.style.display = 'block';
         }
-        
-        // Actualizar la interfaz de usuario
-        function updateUI() {
-            scoreElement.textContent = Math.floor(score);
-            accuracyElement.textContent = `${accuracy.toFixed(1)}%`;
-            comboElement.textContent = combo;
-        }
-        
-        // Finalizar el juego
-        function endGame() {
-            isRunning = false;
-            cancelAnimationFrame(animationId);
-            
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.font = '36px Arial';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText('¡Juego Terminado!', canvas.width / 2, canvas.height / 2 - 50);
-            
-            ctx.font = '24px Arial';
-            ctx.fillText(`Puntuación: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2);
-            ctx.fillText(`Precisión: ${accuracy.toFixed(1)}%`, canvas.width / 2, canvas.height / 2 + 40);
-            ctx.fillText(`Combo Máximo: ${maxCombo}`, canvas.width / 2, canvas.height / 2 + 80);
-            
-            startBtn.textContent = 'Jugar de Nuevo';
-        }
-        
-        // Iniciar la aplicación cuando se cargue la página
-        window.addEventListener('load', init);
     </script>
 </body>
 </html>
